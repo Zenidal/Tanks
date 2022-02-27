@@ -24,9 +24,9 @@ public:
 
 	void OnRotateRight(const float RotateValue);
 
-	void OnRotateTurretRight(const float RotateValue);
-
 	void OnZoomIn(const float Scale);
+
+	void OnShoot();
 
 	FVector GetMousePosition() const { return MouseWorldPosition; };
 

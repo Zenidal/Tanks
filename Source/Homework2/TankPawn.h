@@ -80,6 +80,8 @@ public:
 	void MoveRight(const float Scale);
 
 	void RotateRight(const float Scale);
+
+	void Shoot() const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

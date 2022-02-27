@@ -45,9 +45,12 @@ void ATankPawn::BeginPlay()
 
 	TankController = Cast<ATanksPlayerController>(GetController());
 
-	auto Transform = CannonPosition->GetComponentTransform();
-	Cannon = GetWorld()->SpawnActor<ACannon>(CannonType, Transform);
-	Cannon->AttachToComponent(CannonPosition, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	if (CannonType)
+	{
+		auto Transform = CannonPosition->GetComponentTransform();
+		Cannon = GetWorld()->SpawnActor<ACannon>(CannonType, Transform);
+		Cannon->AttachToComponent(CannonPosition, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	}
 }
 
 // Called every frame
@@ -84,6 +87,14 @@ void ATankPawn::RotateRight(const float Scale)
 
 	MoveScaleTarget *= BreakingScale;
 	SidewaysMoveScaleTarget *= BreakingScale;
+}
+
+void ATankPawn::Shoot() const
+{
+	if (Cannon)
+	{
+		Cannon->Shoot();
+	}
 }
 
 void ATankPawn::MoveTank(const float DeltaTime)

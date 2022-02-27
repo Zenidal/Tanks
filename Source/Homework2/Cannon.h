@@ -30,9 +30,11 @@ public:
 	UArrowComponent* ProjectTileSpawnPoint;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category="Fire Params")
-	float FireRate = 0.3;
+	float FireRate = 0.5;
 
 	ECannonType Type = ECannonType::FireProjectTile;
+
+	void Shoot();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -40,4 +42,8 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void ResetShootState();
+
+	bool bReadyToShoot = true;
 };

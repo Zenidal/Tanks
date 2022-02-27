@@ -15,6 +15,8 @@ void ATanksPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("RotateRight", this, &ATanksPlayerController::OnRotateRight);
 	InputComponent->BindAxis("ZoomIn", this, &ATanksPlayerController::OnZoomIn);
 
+	InputComponent->BindAction("Shoot", IE_Pressed, this, &ATanksPlayerController::OnShoot);
+
 	bShowMouseCursor = true;
 }
 
@@ -72,5 +74,13 @@ void ATanksPlayerController::OnZoomIn(const float Scale)
 		{
 			PlayerTank->ArmComponent->TargetArmLength = NewTargetArmLength;
 		}
+	}
+}
+
+void ATanksPlayerController::OnShoot()
+{
+	if(PlayerTank)
+	{
+		PlayerTank->Shoot();
 	}
 }

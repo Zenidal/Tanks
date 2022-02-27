@@ -29,3 +29,39 @@ void ACannon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+void ACannon::ResetShootState()
+{	
+	bReadyToShoot = true;
+}
+
+void ACannon::Shoot()
+{
+	if (!bReadyToShoot)
+	{
+		return;
+	}
+
+	switch (Type)
+	{
+	case ECannonType::FireProjectTile:
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Cyan, FString(TEXT("Project Tile shoot.")));
+		break;
+	case ECannonType::FireTrace:
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Magenta, FString(TEXT("Trace Shoot.")));
+		break;
+	default:
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString(TEXT("Cannon Type is not supported.")));
+	}
+
+	bReadyToShoot = false;
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle,
+		FTimerDelegate::CreateUObject(this, &ACannon::ResetShootState),
+		1 / FireRate,
+		false,
+		1 / FireRate
+	);
+}
