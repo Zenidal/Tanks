@@ -22,6 +22,8 @@ public:
 
 	void OnMoveRight(float MoveValue);
 
+	void OnRotateRight(float RotateValue);
+
 	void OnZoomIn(float Scale);
 
 	virtual void BeginPlay() override;

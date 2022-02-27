@@ -37,9 +37,9 @@ void ATankPawn::BeginPlay()
 void ATankPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	SetActorLocation(GetActorLocation() + GetActorForwardVector() * SpeedChange * MaxMovementSpeed * DeltaTime, false);	
-	SetActorLocation(GetActorLocation() + GetActorRightVector() * SidewaysSpeedChange * SidewaysMaxMovementSpeed * DeltaTime, false);
+
+	MoveTank(DeltaTime);
+	RotateTank(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -50,10 +50,57 @@ void ATankPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATankPawn::MoveForward(const float Scale)
 {
-	SpeedChange = Scale;
+	MoveScaleTarget = Scale;
 }
 
 void ATankPawn::MoveRight(const float Scale)
 {
-	SidewaysSpeedChange = Scale;
+	SidewaysMoveScaleTarget = Scale;
+}
+
+void ATankPawn::RotateRight(const float Scale)
+{
+	RotationScaleTarget = Scale;
+
+	const auto BreakingScale = 1 - (abs(RotationScaleTarget) / 4);
+
+	MoveScaleTarget *= BreakingScale;
+	SidewaysMoveScaleTarget *= BreakingScale;
+}
+
+void ATankPawn::MoveTank(const float DeltaTime)
+{
+	MoveScaleCurrent = FMath::Lerp(
+		MoveScaleCurrent,
+		MoveScaleTarget,
+		MovementAcceleration
+	);
+	SetActorLocation(
+		GetActorLocation() + GetActorForwardVector() * MoveScaleCurrent * MaxMovementSpeed * DeltaTime,
+		false
+	);
+
+	SidewaysMoveScaleCurrent = FMath::Lerp(
+		SidewaysMoveScaleCurrent,
+		SidewaysMoveScaleTarget,
+		SidewaysMovementAcceleration
+	);
+	SetActorLocation(
+		GetActorLocation() + GetActorRightVector() * SidewaysMoveScaleCurrent * SidewaysMaxMovementSpeed * DeltaTime,
+		false
+	);
+}
+
+void ATankPawn::RotateTank(const float DeltaTime)
+{
+	RotationScaleCurrent = FMath::Lerp(
+		RotationScaleCurrent,
+		RotationScaleTarget,
+		RotationAcceleration
+	);
+
+	auto Rotation = GetActorRotation();
+	Rotation.Yaw += RotationScaleCurrent * MaxRotationSpeed * DeltaTime;
+
+	SetActorRotation(Rotation);
 }

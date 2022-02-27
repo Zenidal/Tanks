@@ -11,6 +11,7 @@ void ATanksController::SetupInputComponent()
 
 	InputComponent->BindAxis("MoveForward", this, &ATanksController::OnMoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ATanksController::OnMoveRight);
+	InputComponent->BindAxis("RotateRight", this, &ATanksController::OnRotateRight);
 	InputComponent->BindAxis("ZoomIn", this, &ATanksController::OnZoomIn);
 }
 
@@ -27,6 +28,14 @@ void ATanksController::OnMoveRight(const float MoveValue)
 	if (PlayerTank)
 	{
 		PlayerTank->MoveRight(MoveValue);
+	}
+}
+
+void ATanksController::OnRotateRight(const float RotateValue)
+{
+	if(PlayerTank)
+	{
+		PlayerTank->RotateRight(RotateValue);
 	}
 }
 
