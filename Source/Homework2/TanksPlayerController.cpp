@@ -3,19 +3,41 @@
 
 #include "TanksPlayerController.h"
 
+#include "DrawDebugHelpers.h"
 #include "TankPawn.h"
 
-void ATanksController::SetupInputComponent()
+void ATanksPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAxis("MoveForward", this, &ATanksController::OnMoveForward);
-	InputComponent->BindAxis("MoveRight", this, &ATanksController::OnMoveRight);
-	InputComponent->BindAxis("RotateRight", this, &ATanksController::OnRotateRight);
-	InputComponent->BindAxis("ZoomIn", this, &ATanksController::OnZoomIn);
+	InputComponent->BindAxis("MoveForward", this, &ATanksPlayerController::OnMoveForward);
+	InputComponent->BindAxis("MoveRight", this, &ATanksPlayerController::OnMoveRight);
+	InputComponent->BindAxis("RotateRight", this, &ATanksPlayerController::OnRotateRight);
+	InputComponent->BindAxis("ZoomIn", this, &ATanksPlayerController::OnZoomIn);
+
+	bShowMouseCursor = true;
 }
 
-void ATanksController::OnMoveForward(const float MoveValue)
+void ATanksPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PlayerTank = CastChecked<ATankPawn>(GetPawn());
+}
+
+void ATanksPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	FVector MousePosition, MouseDirection;
+	DeprojectMousePositionToWorld(MousePosition, MouseDirection);
+
+	const auto Z = abs(PlayerTank->GetActorLocation().Z - MousePosition.Z);
+	MouseWorldPosition = MousePosition - MouseDirection * Z / MouseDirection.Z;
+}
+
+
+void ATanksPlayerController::OnMoveForward(const float MoveValue)
 {
 	if (PlayerTank)
 	{
@@ -23,7 +45,7 @@ void ATanksController::OnMoveForward(const float MoveValue)
 	}
 }
 
-void ATanksController::OnMoveRight(const float MoveValue)
+void ATanksPlayerController::OnMoveRight(const float MoveValue)
 {
 	if (PlayerTank)
 	{
@@ -31,7 +53,7 @@ void ATanksController::OnMoveRight(const float MoveValue)
 	}
 }
 
-void ATanksController::OnRotateRight(const float RotateValue)
+void ATanksPlayerController::OnRotateRight(const float RotateValue)
 {
 	if(PlayerTank)
 	{
@@ -39,7 +61,8 @@ void ATanksController::OnRotateRight(const float RotateValue)
 	}
 }
 
-void ATanksController::OnZoomIn(const float Scale)
+
+void ATanksPlayerController::OnZoomIn(const float Scale)
 {
 	if (PlayerTank)
 	{
@@ -50,11 +73,4 @@ void ATanksController::OnZoomIn(const float Scale)
 			PlayerTank->ArmComponent->TargetArmLength = NewTargetArmLength;
 		}
 	}
-}
-
-void ATanksController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	PlayerTank = CastChecked<ATankPawn>(GetPawn());
 }

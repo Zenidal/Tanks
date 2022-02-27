@@ -60,21 +60,24 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Rotation")
 	float RotationAcceleration = 0.01;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Rotation")
+	float TurretRotationAcceleration = 0.01;
 	
-	void MoveForward(float Scale);
+	void MoveForward(const float Scale);
 
-	void MoveRight(float Scale);
+	void MoveRight(const float Scale);
 
-	void RotateRight(float Scale);
-
-	void MoveTank(float DeltaTime);
-
-	void RotateTank(float DeltaTime);
+	void RotateRight(const float Scale);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
+	void MoveTank(const float DeltaTime);
+	void RotateTank(const float DeltaTime);
+	void RotateTurret(const float DeltaTime);
+
 	float MoveScaleTarget = 0;
 	float MoveScaleCurrent = 0;
 
@@ -83,4 +86,6 @@ private:
 
 	float RotationScaleTarget = 0;
 	float RotationScaleCurrent = 0;
+
+	class ATanksPlayerController* TankController;
 };

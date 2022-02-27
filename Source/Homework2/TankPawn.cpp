@@ -3,6 +3,9 @@
 
 #include "TankPawn.h"
 
+#include "TanksPlayerController.h"
+#include "Kismet/KismetMathLibrary.h"
+
 // Sets default values
 ATankPawn::ATankPawn()
 {
@@ -22,6 +25,11 @@ ATankPawn::ATankPawn()
 	ArmComponent = CreateDefaultSubobject<USpringArmComponent>("ArmComponent");
 	ArmComponent->SetupAttachment(RootComponent);
 
+	// for camera angle - 90°
+	// ArmComponent->bInheritPitch = false;
+	// ArmComponent->bInheritRoll = false;
+	// ArmComponent->bInheritYaw = false;
+
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(ArmComponent);
 	CameraComponent->bUsePawnControlRotation = false;
@@ -31,6 +39,8 @@ ATankPawn::ATankPawn()
 void ATankPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TankController = Cast<ATanksPlayerController>(GetController());
 }
 
 // Called every frame
@@ -40,6 +50,7 @@ void ATankPawn::Tick(float DeltaTime)
 
 	MoveTank(DeltaTime);
 	RotateTank(DeltaTime);
+	RotateTurret(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -103,4 +114,16 @@ void ATankPawn::RotateTank(const float DeltaTime)
 	Rotation.Yaw += RotationScaleCurrent * MaxRotationSpeed * DeltaTime;
 
 	SetActorRotation(Rotation);
+}
+
+void ATankPawn::RotateTurret(const float DeltaTime)
+{
+	if (TankController)
+	{
+		const auto TurretRotation = UKismetMathLibrary::FindLookAtRotation(TurretBoxComponent->GetComponentLocation(), TankController->GetMousePosition());
+		auto OldRotation = TurretBoxComponent->GetComponentRotation();
+		OldRotation.Yaw = TurretRotation.Yaw;
+
+		TurretBoxComponent->SetWorldRotation(FMath::Lerp(TurretBoxComponent->GetComponentRotation(), OldRotation, TurretRotationAcceleration));
+	}
 }
