@@ -28,6 +28,8 @@ public:
 
 	void OnShoot();
 
+	void OnAlternativeFire();
+
 	FVector GetMousePosition() const { return MouseWorldPosition; };
 
 	virtual void BeginPlay() override;

@@ -28,40 +28,59 @@ void ACannon::BeginPlay()
 void ACannon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	GEngine->AddOnScreenDebugMessage(
+		7,
+		1,
+		FColor::Yellow,
+		FString::Printf(TEXT("There are %d cannon ammo available."), CartridgesNumber)
+	);
 }
 
 void ACannon::ResetShootState()
-{	
+{
 	bReadyToShoot = true;
 }
 
 void ACannon::Shoot()
 {
-	if (!bReadyToShoot)
+	if (TakeShoot())
 	{
-		return;
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle,
+			FTimerDelegate::CreateUObject(this, &ACannon::ResetShootState),
+			1 / FireRate,
+			false,
+			1 / FireRate
+		);
+
+		--CartridgesNumber;
+	}
+}
+
+bool ACannon::TakeShoot()
+{
+	const bool bCanShoot = bReadyToShoot && CartridgesNumber > 0;
+
+	if (!bCanShoot)
+	{
+		return false;
 	}
 
 	switch (Type)
 	{
 	case ECannonType::FireProjectTile:
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Cyan, FString(TEXT("Project Tile shoot.")));
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Cyan, FString(TEXT("Project Tile shoot.")));
 		break;
 	case ECannonType::FireTrace:
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Magenta, FString(TEXT("Trace Shoot.")));
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Magenta, FString(TEXT("Trace Shoot.")));
 		break;
 	default:
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, FString(TEXT("Cannon Type is not supported.")));
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString(TEXT("Cannon Type is not supported.")));
 	}
 
 	bReadyToShoot = false;
 
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(
-		TimerHandle,
-		FTimerDelegate::CreateUObject(this, &ACannon::ResetShootState),
-		1 / FireRate,
-		false,
-		1 / FireRate
-	);
+	return true;
 }

@@ -16,6 +16,7 @@ void ATanksPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("ZoomIn", this, &ATanksPlayerController::OnZoomIn);
 
 	InputComponent->BindAction("Shoot", IE_Pressed, this, &ATanksPlayerController::OnShoot);
+	InputComponent->BindAction("AlternativeFire", IE_Pressed, this, &ATanksPlayerController::OnAlternativeFire);
 
 	bShowMouseCursor = true;
 }
@@ -57,7 +58,7 @@ void ATanksPlayerController::OnMoveRight(const float MoveValue)
 
 void ATanksPlayerController::OnRotateRight(const float RotateValue)
 {
-	if(PlayerTank)
+	if (PlayerTank)
 	{
 		PlayerTank->RotateRight(RotateValue);
 	}
@@ -79,8 +80,16 @@ void ATanksPlayerController::OnZoomIn(const float Scale)
 
 void ATanksPlayerController::OnShoot()
 {
-	if(PlayerTank)
+	if (PlayerTank)
 	{
 		PlayerTank->Shoot();
+	}
+}
+
+void ATanksPlayerController::OnAlternativeFire()
+{
+	if (PlayerTank)
+	{
+		PlayerTank->AlternativeShoot();
 	}
 }

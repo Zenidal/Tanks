@@ -93,6 +93,16 @@ void ATankPawn::Shoot() const
 {
 	if (Cannon)
 	{
+		Cannon->Type = ECannonType::FireProjectTile;
+		Cannon->Shoot();
+	}
+}
+
+void ATankPawn::AlternativeShoot() const
+{
+	if (Cannon)
+	{
+		Cannon->Type = ECannonType::FireTrace;
 		Cannon->Shoot();
 	}
 }
