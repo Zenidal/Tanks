@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "ARComponent.h"
+#include "Cannon.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -29,7 +31,7 @@ public:
 	UBoxComponent* BodyBoxComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
-	UStaticMeshComponent* TankBody;	
+	UStaticMeshComponent* TankBody;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	UBoxComponent* TurretBoxComponent;
@@ -43,12 +45,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
 	UCameraComponent* CameraComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components")
+	UArrowComponent* CannonPosition;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Fire Params")
+	TSubclassOf<ACannon> CannonType;
+
+	UPROPERTY()
+	ACannon* Cannon;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement")
 	float MaxMovementSpeed = 400;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement")
 	float MovementAcceleration = 0.01;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Movement")
 	float SidewaysMaxMovementSpeed = 200;
 
@@ -63,7 +74,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Rotation")
 	float TurretRotationAcceleration = 0.01;
-	
+
 	void MoveForward(const float Scale);
 
 	void MoveRight(const float Scale);

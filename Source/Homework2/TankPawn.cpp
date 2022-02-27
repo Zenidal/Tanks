@@ -22,6 +22,9 @@ ATankPawn::ATankPawn()
 	TankTurret = CreateDefaultSubobject<UStaticMeshComponent>("TankTurret");
 	TankTurret->SetupAttachment(TurretBoxComponent);
 
+	CannonPosition = CreateDefaultSubobject<UArrowComponent>("CannonPosition");
+	CannonPosition->SetupAttachment(TankTurret);
+
 	ArmComponent = CreateDefaultSubobject<USpringArmComponent>("ArmComponent");
 	ArmComponent->SetupAttachment(RootComponent);
 
@@ -41,6 +44,10 @@ void ATankPawn::BeginPlay()
 	Super::BeginPlay();
 
 	TankController = Cast<ATanksPlayerController>(GetController());
+
+	auto Transform = CannonPosition->GetComponentTransform();
+	Cannon = GetWorld()->SpawnActor<ACannon>(CannonType, Transform);
+	Cannon->AttachToComponent(CannonPosition, FAttachmentTransformRules::SnapToTargetIncludingScale);
 }
 
 // Called every frame
@@ -120,10 +127,19 @@ void ATankPawn::RotateTurret(const float DeltaTime)
 {
 	if (TankController)
 	{
-		const auto TurretRotation = UKismetMathLibrary::FindLookAtRotation(TurretBoxComponent->GetComponentLocation(), TankController->GetMousePosition());
+		const auto TurretRotation = UKismetMathLibrary::FindLookAtRotation(
+			TurretBoxComponent->GetComponentLocation(),
+			TankController->GetMousePosition()
+		);
 		auto OldRotation = TurretBoxComponent->GetComponentRotation();
 		OldRotation.Yaw = TurretRotation.Yaw;
 
-		TurretBoxComponent->SetWorldRotation(FMath::Lerp(TurretBoxComponent->GetComponentRotation(), OldRotation, TurretRotationAcceleration));
+		TurretBoxComponent->SetWorldRotation(
+			FMath::Lerp(
+				TurretBoxComponent->GetComponentRotation(),
+				OldRotation,
+				TurretRotationAcceleration
+			)
+		);
 	}
 }
