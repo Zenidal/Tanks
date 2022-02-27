@@ -42,11 +42,35 @@ void ACannon::ResetShootState()
 	bReadyToShoot = true;
 }
 
+void ACannon::ShootAndReset()
+{
+	ResetShootState();
+
+	if (MadeBurstShots < ShotBurst)
+	{
+		if (TakeShoot())
+		{
+			MadeBurstShots++;
+		}
+	}
+	else
+	{
+		MadeBurstShots = 0;
+		bCannonIsBusy = false;
+
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
+}
+
 void ACannon::Shoot()
 {
+	if (bCannonIsBusy)
+	{
+		return;
+	}
+
 	if (TakeShoot())
 	{
-		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(
 			TimerHandle,
 			FTimerDelegate::CreateUObject(this, &ACannon::ResetShootState),
@@ -57,6 +81,26 @@ void ACannon::Shoot()
 
 		--CartridgesNumber;
 	}
+}
+
+void ACannon::Fire()
+{
+	if (bCannonIsBusy)
+	{
+		return;
+	}
+
+	bCannonIsBusy = true;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle,
+		FTimerDelegate::CreateUObject(this, &ACannon::ShootAndReset),
+		1 / FireRate,
+		true,
+		1 / FireRate
+	);
+
+	--CartridgesNumber;
 }
 
 bool ACannon::TakeShoot()
@@ -83,4 +127,12 @@ bool ACannon::TakeShoot()
 	bReadyToShoot = false;
 
 	return true;
+}
+
+void ACannon::ChangeCannonType(const ECannonType CannonType)
+{
+	if (!bCannonIsBusy)
+	{
+		Type = CannonType;
+	}
 }

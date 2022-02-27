@@ -28,6 +28,8 @@ public:
 
 	void OnShoot();
 
+	void OnFire();
+
 	void OnAlternativeFire();
 
 	FVector GetMousePosition() const { return MouseWorldPosition; };

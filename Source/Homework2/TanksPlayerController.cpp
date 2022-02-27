@@ -16,6 +16,7 @@ void ATanksPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("ZoomIn", this, &ATanksPlayerController::OnZoomIn);
 
 	InputComponent->BindAction("Shoot", IE_Pressed, this, &ATanksPlayerController::OnShoot);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &ATanksPlayerController::OnFire);
 	InputComponent->BindAction("AlternativeFire", IE_Pressed, this, &ATanksPlayerController::OnAlternativeFire);
 
 	bShowMouseCursor = true;
@@ -83,6 +84,14 @@ void ATanksPlayerController::OnShoot()
 	if (PlayerTank)
 	{
 		PlayerTank->Shoot();
+	}
+}
+
+void ATanksPlayerController::OnFire()
+{
+	if(PlayerTank)
+	{
+		PlayerTank->Fire();
 	}
 }
 

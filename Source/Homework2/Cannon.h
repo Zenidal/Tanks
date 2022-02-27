@@ -33,22 +33,37 @@ public:
 	float FireRate = 2;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category="Fire Params")
-	int CartridgesNumber = 20;
+	int CartridgesNumber = 20;	
 
-	ECannonType Type = ECannonType::FireProjectTile;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category="Fire Params")
+	int ShotBurst = 5;
 
 	void Shoot();
+
+	void Fire();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 private:
 	bool TakeShoot();
+
+	int MadeBurstShots = 0;
+
+	ECannonType Type = ECannonType::FireProjectTile;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	void ResetShootState();
 
+	void ShootAndReset();
+
 	bool bReadyToShoot = true;
+
+	bool bCannonIsBusy = false;
+	
+	FTimerHandle TimerHandle;
+
+	void ChangeCannonType(ECannonType CannonType);
 };

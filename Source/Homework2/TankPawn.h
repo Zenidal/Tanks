@@ -83,6 +83,8 @@ public:
 
 	void Shoot() const;
 
+	void Fire() const;
+
 	void AlternativeShoot() const;
 protected:
 	// Called when the game starts or when spawned
