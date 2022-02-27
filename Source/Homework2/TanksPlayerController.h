@@ -11,22 +11,36 @@
  * 
  */
 UCLASS()
-class HOMEWORK2_API ATanksController : public APlayerController
+class HOMEWORK2_API ATanksPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
 	virtual void SetupInputComponent() override;
 
-	void OnMoveForward(float MoveValue);
+	void OnMoveForward(const float MoveValue);
 
-	void OnMoveRight(float MoveValue);
+	void OnMoveRight(const float MoveValue);
 
-	void OnZoomIn(float Scale);
+	void OnRotateRight(const float RotateValue);
+
+	void OnZoomIn(const float Scale);
+
+	void OnShoot();
+
+	void OnFire();
+
+	void OnAlternativeFire();
+
+	FVector GetMousePosition() const { return MouseWorldPosition; };
 
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	UPROPERTY()
 	ATankPawn* PlayerTank;
+
+	FVector MouseWorldPosition;
 };

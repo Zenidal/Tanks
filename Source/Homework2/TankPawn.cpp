@@ -3,6 +3,9 @@
 
 #include "TankPawn.h"
 
+#include "TanksPlayerController.h"
+#include "Kismet/KismetMathLibrary.h"
+
 // Sets default values
 ATankPawn::ATankPawn()
 {
@@ -19,8 +22,16 @@ ATankPawn::ATankPawn()
 	TankTurret = CreateDefaultSubobject<UStaticMeshComponent>("TankTurret");
 	TankTurret->SetupAttachment(TurretBoxComponent);
 
+	CannonPosition = CreateDefaultSubobject<UArrowComponent>("CannonPosition");
+	CannonPosition->SetupAttachment(TankTurret);
+
 	ArmComponent = CreateDefaultSubobject<USpringArmComponent>("ArmComponent");
 	ArmComponent->SetupAttachment(RootComponent);
+
+	// for camera angle - 90°
+	// ArmComponent->bInheritPitch = false;
+	// ArmComponent->bInheritRoll = false;
+	// ArmComponent->bInheritYaw = false;
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(ArmComponent);
@@ -31,15 +42,25 @@ ATankPawn::ATankPawn()
 void ATankPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TankController = Cast<ATanksPlayerController>(GetController());
+
+	if (CannonType)
+	{
+		auto Transform = CannonPosition->GetComponentTransform();
+		Cannon = GetWorld()->SpawnActor<ACannon>(CannonType, Transform);
+		Cannon->AttachToComponent(CannonPosition, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	}
 }
 
 // Called every frame
 void ATankPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	SetActorLocation(GetActorLocation() + GetActorForwardVector() * SpeedChange * MaxMovementSpeed * DeltaTime, false);	
-	SetActorLocation(GetActorLocation() + GetActorRightVector() * SidewaysSpeedChange * SidewaysMaxMovementSpeed * DeltaTime, false);
+
+	MoveTank(DeltaTime);
+	RotateTank(DeltaTime);
+	RotateTurret(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -50,10 +71,104 @@ void ATankPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ATankPawn::MoveForward(const float Scale)
 {
-	SpeedChange = Scale;
+	MoveScaleTarget = Scale;
 }
 
 void ATankPawn::MoveRight(const float Scale)
 {
-	SidewaysSpeedChange = Scale;
+	SidewaysMoveScaleTarget = Scale;
+}
+
+void ATankPawn::RotateRight(const float Scale)
+{
+	RotationScaleTarget = Scale;
+
+	const auto BreakingScale = 1 - (abs(RotationScaleTarget) / 4);
+
+	MoveScaleTarget *= BreakingScale;
+	SidewaysMoveScaleTarget *= BreakingScale;
+}
+
+void ATankPawn::Shoot() const
+{
+	if (Cannon)
+	{
+		Cannon->ChangeCannonType(ECannonType::FireProjectTile);
+		Cannon->Shoot();
+	}
+}
+
+void ATankPawn::Fire() const
+{
+	if (Cannon)
+	{
+		Cannon->Fire();
+	}
+}
+
+void ATankPawn::AlternativeShoot() const
+{
+	if (Cannon)
+	{
+		Cannon->ChangeCannonType(ECannonType::FireTrace);
+		Cannon->Shoot();
+	}
+}
+
+void ATankPawn::MoveTank(const float DeltaTime)
+{
+	MoveScaleCurrent = FMath::Lerp(
+		MoveScaleCurrent,
+		MoveScaleTarget,
+		MovementAcceleration
+	);
+	SetActorLocation(
+		GetActorLocation() + GetActorForwardVector() * MoveScaleCurrent * MaxMovementSpeed * DeltaTime,
+		false
+	);
+
+	SidewaysMoveScaleCurrent = FMath::Lerp(
+		SidewaysMoveScaleCurrent,
+		SidewaysMoveScaleTarget,
+		SidewaysMovementAcceleration
+	);
+	SetActorLocation(
+		GetActorLocation() + GetActorRightVector() * SidewaysMoveScaleCurrent * SidewaysMaxMovementSpeed * DeltaTime,
+		false
+	);
+}
+
+void ATankPawn::RotateTank(const float DeltaTime)
+{
+	RotationScaleCurrent = FMath::Lerp(
+		RotationScaleCurrent,
+		RotationScaleTarget,
+		RotationAcceleration
+	);
+
+	auto Rotation = GetActorRotation();
+	Rotation.Yaw += RotationScaleCurrent * MaxRotationSpeed * DeltaTime;
+
+	SetActorRotation(Rotation);
+}
+
+void ATankPawn::RotateTurret(const float DeltaTime)
+{
+	if (TankController)
+	{
+		const auto TurretRotation = UKismetMathLibrary::FindLookAtRotation(
+			TurretBoxComponent->GetComponentLocation(),
+			TankController->GetMousePosition()
+		);
+		auto OldRotation = TurretBoxComponent->GetComponentRotation();
+		OldRotation.Yaw = TurretRotation.Yaw;
+
+		TurretBoxComponent->SetWorldRotation(
+			FMath::Lerp(
+				TurretBoxComponent->GetComponentRotation(),
+				OldRotation,
+				TurretRotationAcceleration
+			)
+		);
+	}
 }
